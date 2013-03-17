@@ -1,0 +1,10 @@
+PROJECT_NAME		= MEBM
+PROJECT_NUMBER		=  1.0.0
+FULL_PATH_NAMES		= YES
+STRIP_FROM_PATH  	= .
+OUTPUT_DIRECTORY	= ../../../doc/library/MEBM
+INPUT			= . ../../mebm_tut_1
+FILE_PATTERNS		= *.h *.cpp *.ino *.doxygen
+EXCLUDE_FILES		= .git
+EXAMPLE_PATH		= ../../mebm_tut_0 ../../mebm_tut_1 ../../mebm_tut_2 ../../mebm_tut_3
+QT_AUTOBRIEF		= YES

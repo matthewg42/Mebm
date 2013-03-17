@@ -1,0 +1,77 @@
+/**
+
+\mainpage Arduino MEBM Messaging Library
+
+MEBM stands for: <b>M</b>ouse's <b>E</b>thernet <b>B</b>ased <b>M</b>essaging, and is a super-simple protocol for 
+sending messages between Arduinos over Ethernet based TCP/IP (i.e. Arduinos with Ethernet shields on them, the integrated 
+Arduino Ethernet board, Nanode and so on).
+
+Each Arduino sends and receives MEBM Protocol messages using the MebmNode class, which implements methods for constructing
+correctly formatted messages, sending them, and handling incoming messages.
+
+The MEBM Protocol
+-----------------
+
+MEBM messages are fixed size structures with the following fields:
+
+ - MEBM Magic (4 bytes)		To help identify MEBM messages
+ - MessageFrom (12 bytes)	An ID of the Node which sent the message
+ - MessageType (12 bytes)	Some arbitray string to identify the purpose of the message
+ - MessageData (48 bytes)	Arbitrary message data.
+
+A typical message might be that a magstripe has been read by a MebmNode called "MagReader":
+ - MessageFrom = "MagReader"
+ - MessageType = "ReadCard"
+ - MessageData = ";1234567890ABCDEF;00000000001"
+
+Fields are NULL padded up to their length.
+
+Responders
+----------
+
+Handling of incoming messages is done by registering callback functions with a From and Type filter.  Incoming messages
+which match both filters will trigger the callback.  Filters can match either specific From / Type values or anything
+(using the "*" wildcard).  For example:
+
+ - FromFilter = *
+ - TypeFilter = *
+ - Callback = someFunction()
+
+In this case, the callback will be called when any message is sent to the node, because both filters match any 
+incoming value.  A less promiscuous filter might look like this:
+
+ - FromFilter = KitchenNode
+ - TypeFilter = Temperature
+ - Callback = recordKitchenTemp()
+
+@example mebm_tut_0.ino
+Tutorial number 0: Setting up the ethernet card with a statically allocated IP address.
+
+@example mebm_tut_1.ino
+Tutorial number 1: Sending messages using Mebm. 
+
+Lets say we have an Arduino in the kitchen,
+and it has a thermometer sensor attached. We want to send a message over the network to 
+a hypothetical destination we call the "receiverNode", telling it what the temperature is every
+few seconds.  In this example we simulate a temperature sensor with a function which returns a 
+random value between 0 and 50 C with the function getTemperature().
+
+@example mebm_tut_2.ino
+Tutorial number 2: Receiving messages using Mebm. 
+
+Again we are going to imagine our arduino in
+a kitchen.  This time, we imagine it being hooked up to the cooker somehow, with the ability to
+turn it on and off by calling turnOvenOn() and turnOvenOff().  We also have some mechanism for
+changing the temperature of the oven by calling setOvenTemperature().
+
+In this example we see that the data part of the message is entirely arbitrary, so long as 
+it fits into the 48 bytes allocated.  For setting the oven temperature we expect an integer
+encoded as a string which we extract using scanf().
+
+Messages to control the oven can come from anywhere on the network - for example a smartphone
+app which connects to the house web server.
+
+@example mebm_tut_3.ino
+Tutorial number 3: Greenhouse control system.
+
+*/
