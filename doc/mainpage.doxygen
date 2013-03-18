@@ -66,12 +66,27 @@ changing the temperature of the oven by calling setOvenTemperature().
 
 In this example we see that the data part of the message is entirely arbitrary, so long as 
 it fits into the 48 bytes allocated.  For setting the oven temperature we expect an integer
-encoded as a string which we extract using scanf().
+encoded as a string which we extract using atoi().
 
 Messages to control the oven can come from anywhere on the network - for example a smartphone
 app which connects to the house web server.
 
 @example mebm_tut_3.ino
 Tutorial number 3: Greenhouse control system.
+
+In this example, we imagine out arduino sitting in a greenhouse. It has a temperature sensor which 
+is read by calling getTemperature(), and a soil humidity sensor which is read by calling 
+getSoilHumidity().
+
+Outgoing messages should be sent to 192.168.1.1 as follows:
+1. The temperature should be sent about once every minute in a message with the type "temp".
+2. The humidity should be sent once every five minutes in a message with type "humidity".
+
+The arduino should also respond to the following incoming messages:
+1. From: "house", Type: "Heater", Data: "On" - turns on a heater by calling turnOnHeater()
+2. From: "house", Type: "Heater", Data: "Off" - turns on a heater by calling turnOffHeater()
+3. From: "house", Type: "Water", Data: [integer] X - turns on sprinkers for X minutes by calling turnOnSprinklers() and then turns them off by calling turnOffSprinklers() X minutes later
+4. From: "house", Type: "Status", Data: - sends a message to the house node at 192.168.1.1 containing a quick summary of the status of the heater, sprinkler, soil humidity and temperature.
+
 
 */
