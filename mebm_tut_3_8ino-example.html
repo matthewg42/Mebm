@@ -80,23 +80,23 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 <p>Tutorial number 3: Greenhouse control system.</p>
-<p>In this example, we imagine out arduino sitting in a greenhouse. It has a temperature sensor which is read by calling getTemperature(), and a soil humidity sensor which is read by calling getSoilHumidity().</p>
+<p>In this example, we imagine out Arduino sitting in a greenhouse. It has a temperature sensor which is read by calling getTemperature(), and a soil humidity sensor which is read by calling getSoilHumidity().</p>
 <p>Outgoing messages should be sent to 192.168.1.1 as follows:</p>
 <ol type="1">
 <li>The temperature should be sent about once every minute in a message with the type "temp".</li>
 <li>The humidity should be sent once every five minutes in a message with type "humidity".</li>
 </ol>
-<p>The arduino should also respond to the following incoming messages:</p>
+<p>The Arduino should also respond to the following incoming messages:</p>
 <ol type="1">
 <li>From: "house", Type: "Heater", Data: "On" - turns on a heater by calling turnOnHeater()</li>
 <li>From: "house", Type: "Heater", Data: "Off" - turns on a heater by calling turnOffHeater()</li>
-<li>From: "house", Type: "Water", Data: [integer] X - turns on sprinkers for X minutes by calling turnOnSprinklers() and then turns them off by calling turnOffSprinklers() X minutes later</li>
+<li>From: "house", Type: "Water", Data: [integer] X - turns on sprinklers for X minutes by calling turnOnSprinklers() and then turns them off by calling turnOffSprinklers() X minutes later</li>
 <li>From: "house", Type: "Status", Data: - sends a message to the house node at 192.168.1.1 containing a quick summary of the status of the heater, sprinkler, soil humidity and temperature.</li>
 </ol>
 <div class="fragment"></div><!-- fragment --> </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Mar 17 2013 23:39:29 for Mebm by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Mar 18 2013 14:05:28 for Mebm by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.3
 </small></address>

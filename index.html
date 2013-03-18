@@ -79,25 +79,35 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">Arduino MEBM Messaging Library </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>MEBM stands for: <b>M</b>ouse's <b>E</b>thernet <b>B</b>ased <b>M</b>essaging, and is a super-simple protocol for sending messages between Arduinos over Ethernet based TCP/IP (i.e. Arduinos with Ethernet shields on them, the integrated Arduino Ethernet board, Nanode and so on).</p>
-<p>Each Arduino sends and receives MEBM Protocol messages using the MebmNode class, which implements methods for constructing correctly formatted messages, sending them, and handling incoming messages.</p>
-<h2>The MEBM Protocol</h2>
-<p>MEBM messages are fixed size structures with the following fields:</p>
+<div class="textblock"><p>MEBM stands for: <b>M</b>ouse's <b>E</b>thernet <b>B</b>ased <b>M</b>essaging, and is a super-simple protocol for sending messages between Arduinos over Ethernet based TCP/IP (i.e. Arduino devices with Ethernet shields on them, the integrated Arduino Ethernet board, Nanode and so on).</p>
+<p>Each Arduino sends and receives MEBM Protocol messages using the Mebm object, which implements methods for constructing correctly formatted messages, sending them, and handling incoming messages.</p>
+<h2>The Mebm Protocol</h2>
+<p>Mebm messages are fixed size structures with the following fields:</p>
 <ul>
-<li>MEBM Magic (4 bytes) To help identify MEBM messages</li>
+<li>Mebm Magic Header (4 bytes) To help identify MEBM messages</li>
 <li>MessageFrom (12 bytes) An ID of the Node which sent the message</li>
-<li>MessageType (12 bytes) Some arbitray string to identify the purpose of the message</li>
+<li>MessageType (12 bytes) Some arbitrary string to identify the purpose of the message</li>
 <li>MessageData (48 bytes) Arbitrary message data.</li>
 </ul>
-<p>A typical message might be that a magstripe has been read by a MebmNode called "MagReader":</p>
+<p>Fields are NULL padded up to their length.</p>
+<p>A typical message might be that a magstripe has been read by a Mebm with the name "MagReader":</p>
 <ul>
+<li>Header = "MeBm"</li>
 <li>MessageFrom = "MagReader"</li>
 <li>MessageType = "ReadCard"</li>
 <li>MessageData = ";1234567890ABCDEF;00000000001"</li>
 </ul>
-<p>Fields are NULL padded up to their length.</p>
+<p>Which, once encoded would look like this if examined with hexdump:</p>
+<pre>00000000  4d 65 42 6d 4d 61 67 52  65 61 64 65 72 00 00 00  |MeBmMagReader...|
+00000010  52 65 61 64 43 61 72 64  00 00 00 00 3b 31 32 33  |ReadCard....;123|
+00000020  34 35 36 37 38 39 30 41  42 43 44 45 46 3b 30 30  |4567890ABCDEF;00|
+00000030  30 30 30 30 30 30 30 30  31 00 00 00 00 00 00 00  |000000001.......|
+00000040  00 00 00 00 00 00 00 00  00 00 00 00              |............|
+0000004c</pre><p>Mebm messages are sent over TCP/IP on port 2300.</p>
+<h2>Implementation for Arduino</h2>
+<p>This library implements <a class="el" href="class_mebm_class.html" title="A node for sending and receiving MEBM protocol messages.">MebmClass</a>, which includes functionality for sending and receiving Mebm protocol messages. In the style of the Arduino Ethernet, Serial and other libraries, the Mebm library provides an instance of <a class="el" href="class_mebm_class.html" title="A node for sending and receiving MEBM protocol messages.">MebmClass</a> named <b>Mebm</b>, which is configured using <b>Mebm.begin()</b>. See the examples provided, and <a class="el" href="class_mebm_class.html" title="A node for sending and receiving MEBM protocol messages.">MebmClass</a> documentation for details.</p>
 <h2>Responders</h2>
-<p>Handling of incoming messages is done by registering callback functions with a From and Type filter. Incoming messages which match both filters will trigger the callback. Filters can match either specific From / Type values or anything (using the "*" wildcard). For example:</p>
+<p>Handling of incoming messages is done by registering callback functions with a From and Type filter (see <a class="el" href="class_mebm_class.html#aa5bde35e07aee487b882933f2d008fe2" title="Add a resonder for incoming messages.">MebmClass::addResponder</a>). Incoming messages which match both filters will trigger the callback. Filters can match either specific From / Type values or anything (using the "*" wildcard). For example:</p>
 <ul>
 <li>FromFilter = *</li>
 <li>TypeFilter = *</li>
@@ -112,7 +122,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Mar 17 2013 23:39:29 for Mebm by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Mar 18 2013 14:05:28 for Mebm by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.3
 </small></address>
