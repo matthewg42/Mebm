@@ -112,6 +112,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae619db2126171f1d7d63220784e28364"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mebm_class.html#ae619db2126171f1d7d63220784e28364">sendToIP</a> (const IPAddress &amp;toIP, const char *messageType, const char *data)</td></tr>
 <tr class="memdesc:ae619db2126171f1d7d63220784e28364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a MEBM message to a specific IP address.  <a href="#ae619db2126171f1d7d63220784e28364"></a><br/></td></tr>
 <tr class="separator:ae619db2126171f1d7d63220784e28364"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e07b1c804112b8ad0fbb7ea09f98a2a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1e07b1c804112b8ad0fbb7ea09f98a2a"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>sendToIP</b> (const IPAddress &amp;toIP, const char *messageType, int data)</td></tr>
+<tr class="separator:a1e07b1c804112b8ad0fbb7ea09f98a2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a950263fdfbecdf27b82774309b5ffc1c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a950263fdfbecdf27b82774309b5ffc1c"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>sendToIP</b> (const IPAddress &amp;toIP, const char *messageType, float data)</td></tr>
+<tr class="separator:a950263fdfbecdf27b82774309b5ffc1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5bde35e07aee487b882933f2d008fe2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_mebm_class.html#aa5bde35e07aee487b882933f2d008fe2">addResponder</a> (const char *msgFrom, const char *messageType, void(*callBack)(<a class="el" href="class_mebm_class.html">MebmClass</a> &amp;, const <a class="el" href="structt__mebm_message.html">t_mebmMessage</a> *))</td></tr>
 <tr class="memdesc:aa5bde35e07aee487b882933f2d008fe2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a resonder for incoming messages.  <a href="#aa5bde35e07aee487b882933f2d008fe2"></a><br/></td></tr>
 <tr class="separator:aa5bde35e07aee487b882933f2d008fe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -147,7 +153,7 @@ Static Public Member Functions</h2></td></tr>
 <p>A <a class="el" href="class_mebm_class.html" title="A node for sending and receiving MEBM protocol messages.">MebmClass</a> object can have a server associated with it, which is where it sends outbound messages to by default. Typically this will be the central control node.</p>
 <p>A <a class="el" href="class_mebm_class.html" title="A node for sending and receiving MEBM protocol messages.">MebmClass</a> object can also listen for and react to incoming messages from other nodes. To do this, <em>responders</em> are added. A responder is a FromNode pattern (* or a fixed name), a message type pattern (* or a fixed string), and a callback function which will be triggered when an incoming message's FromNode and MessageType match the specified pattern.</p>
 <p>In the style of the Arduino Ethernet and Serial libraries, we also create an instance of <a class="el" href="class_mebm_class.html" title="A node for sending and receiving MEBM protocol messages.">MebmClass</a> called Mebm which you can access from within your code. </p>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="mebm_tut_2_8ino-example.html#_a4">mebm_tut_2.ino</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="mebm_tut_2_8ino-example.html#_a4">mebm_tut_2.ino</a>, and <a class="el" href="mebm_tut_3_8ino-example.html#_a5">mebm_tut_3.ino</a>.</dd>
 </dl></div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a83651d70e023b16f8ff2caa58173522e"></a>
 <div class="memitem">
@@ -233,7 +239,7 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <p>Another example: node.addResponder("*", "SwitchLights", lightSwitch); will add a responder which works when and node (*) sends a "SwitchLights" message type, calling lightSwitch() in this case. </p>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="mebm_tut_2_8ino-example.html#a2">mebm_tut_2.ino</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="mebm_tut_2_8ino-example.html#a2">mebm_tut_2.ino</a>, and <a class="el" href="mebm_tut_3_8ino-example.html#a2">mebm_tut_3.ino</a>.</dd>
 </dl>
 </div>
 </div>
@@ -276,7 +282,7 @@ Static Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="mebm_tut_1_8ino-example.html#a1">mebm_tut_1.ino</a>, and <a class="el" href="mebm_tut_2_8ino-example.html#a1">mebm_tut_2.ino</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="mebm_tut_1_8ino-example.html#a1">mebm_tut_1.ino</a>, <a class="el" href="mebm_tut_2_8ino-example.html#a1">mebm_tut_2.ino</a>, and <a class="el" href="mebm_tut_3_8ino-example.html#a1">mebm_tut_3.ino</a>.</dd>
 </dl>
 </div>
 </div>
@@ -339,7 +345,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Check for incoming messages. </p>
 <p>This should be called frequently from the loop() function to catch incoming messages Returns -1 if there was no incoming message to process, else how many handlers matched the message. </p>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="mebm_tut_2_8ino-example.html#a3">mebm_tut_2.ino</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="mebm_tut_2_8ino-example.html#a3">mebm_tut_2.ino</a>, and <a class="el" href="mebm_tut_3_8ino-example.html#a4">mebm_tut_3.ino</a>.</dd>
 </dl>
 </div>
 </div>
@@ -383,7 +389,7 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>0 on successful send, non-0 otherwise. </dd></dl>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="mebm_tut_1_8ino-example.html#a2">mebm_tut_1.ino</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="mebm_tut_1_8ino-example.html#a2">mebm_tut_1.ino</a>, and <a class="el" href="mebm_tut_3_8ino-example.html#a3">mebm_tut_3.ino</a>.</dd>
 </dl>
 </div>
 </div>
@@ -428,7 +434,7 @@ Static Public Member Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Mar 18 2013 14:05:28 for Mebm by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Mar 18 2013 15:52:05 for Mebm by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.3
 </small></address>

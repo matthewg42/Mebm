@@ -93,10 +93,165 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>From: "house", Type: "Water", Data: [integer] X - turns on sprinklers for X minutes by calling turnOnSprinklers() and then turns them off by calling turnOffSprinklers() X minutes later</li>
 <li>From: "house", Type: "Status", Data: - sends a message to the house node at 192.168.1.1 containing a quick summary of the status of the heater, sprinkler, soil humidity and temperature.</li>
 </ol>
-<div class="fragment"></div><!-- fragment --> </div><!-- contents -->
+<p>In addition to these messaging requirements, the control system should automatically shut off the heater if the temperature gets higher than 25 C, and shut off the sprinkler if the soil humidity rises above 90.</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;Ethernet.h&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;SPI.h&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="_mebm_8h.html" title="Define Mebm protocol structres and the MebmClass and extern global.">Mebm.h</a>&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;TickTimer.h&gt;</span></div>
+<div class="line"></div>
+<div class="line">byte mac[] = { 0x90, 0xA2, 0xDA, 0x0D, 0x59, 0x20 };</div>
+<div class="line">IPAddress greenhouseIP(192, 168, 1, 101); </div>
+<div class="line">IPAddress houseIP(192, 168, 1, 1);</div>
+<div class="line"><span class="keywordtype">int</span> ticks = 0;</div>
+<div class="line">TickTimer sprinklerTimer(turnOffSprinkler);</div>
+<div class="line"><span class="keywordtype">bool</span> heaterIsOn = <span class="keyword">false</span>;</div>
+<div class="line"><span class="keywordtype">bool</span> sprinklerIsOn = <span class="keyword">false</span>;</div>
+<div class="line"><span class="keywordtype">int</span> greenhouseTemperature = 15;</div>
+<div class="line"><span class="keywordtype">int</span> soilHumidity = 75;</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> setup()</div>
+<div class="line">{</div>
+<div class="line">    Serial.begin(9600);</div>
+<div class="line">    Ethernet.begin(mac, greenhouseIP);</div>
+<div class="line">    <a name="a0"></a>Mebm.<a name="a1"></a><a class="code" href="class_mebm_class.html#a7a43997f21a869bba3e2ffa60941409c" title="Configure the MebmClass object.">begin</a>(<span class="stringliteral">&quot;greenhouse&quot;</span>, 3);     <span class="comment">// second parameter = 3 responders</span></div>
+<div class="line"></div>
+<div class="line">    <span class="comment">// Add responders for the various incoming messages</span></div>
+<div class="line">    Mebm.<a name="a2"></a><a class="code" href="class_mebm_class.html#aa5bde35e07aee487b882933f2d008fe2" title="Add a resonder for incoming messages.">addResponder</a>(<span class="stringliteral">&quot;house&quot;</span>, <span class="stringliteral">&quot;Heater&quot;</span>, handleHeaterMessage);</div>
+<div class="line">    Mebm.<a class="code" href="class_mebm_class.html#aa5bde35e07aee487b882933f2d008fe2" title="Add a resonder for incoming messages.">addResponder</a>(<span class="stringliteral">&quot;house&quot;</span>, <span class="stringliteral">&quot;Water&quot;</span>,  handleWaterMessage);</div>
+<div class="line">    Mebm.<a class="code" href="class_mebm_class.html#aa5bde35e07aee487b882933f2d008fe2" title="Add a resonder for incoming messages.">addResponder</a>(<span class="stringliteral">&quot;house&quot;</span>, <span class="stringliteral">&quot;Status&quot;</span>, handleStatusRequest);</div>
+<div class="line"></div>
+<div class="line">    <span class="comment">// Delays in setup() are often added to let the power supply stabailize</span></div>
+<div class="line">    <span class="comment">// This is done to prevent erroneous sensor readings</span></div>
+<div class="line">    delay(500);</div>
+<div class="line"></div>
+<div class="line">    Serial.println(<span class="stringliteral">&quot;setup() done, system running&quot;</span>);</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> loop()</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">// wait one second</span></div>
+<div class="line">    delay(1000);</div>
+<div class="line">    ticks++;</div>
+<div class="line"></div>
+<div class="line">    <span class="comment">// once every 30 seconds, we&#39;ll simulate a variation in temperature and humidity</span></div>
+<div class="line">    <span class="keywordflow">if</span> (ticks % 30 == 0)</div>
+<div class="line">        simulateEnvironment(); </div>
+<div class="line">        </div>
+<div class="line">    <span class="comment">// once every minute send the temperature</span></div>
+<div class="line">    <span class="keywordflow">if</span> (ticks % 60 == 0)</div>
+<div class="line">        Mebm.<a name="a3"></a><a class="code" href="class_mebm_class.html#ae619db2126171f1d7d63220784e28364" title="Send a MEBM message to a specific IP address.">sendToIP</a>(houseIP, <span class="stringliteral">&quot;temp&quot;</span>, getTemperature());</div>
+<div class="line"></div>
+<div class="line">    <span class="comment">// once every five minutes send the humidity</span></div>
+<div class="line">    <span class="keywordflow">if</span> (ticks % (60*5) == 0)</div>
+<div class="line">        Mebm.<a class="code" href="class_mebm_class.html#ae619db2126171f1d7d63220784e28364" title="Send a MEBM message to a specific IP address.">sendToIP</a>(houseIP, <span class="stringliteral">&quot;humidity&quot;</span>, getHumidity());</div>
+<div class="line"></div>
+<div class="line">    <span class="comment">// safeguards so we don&#39;t make the greenhouse TOO hot or wet</span></div>
+<div class="line">    <span class="keywordflow">if</span> (getTemperature() &gt; 25) </div>
+<div class="line">        turnOffHeater();</div>
+<div class="line">        </div>
+<div class="line">    <span class="keywordflow">if</span> (getHumidity() &gt; 90)</div>
+<div class="line">        turnOffSprinkler();</div>
+<div class="line">        </div>
+<div class="line">    <span class="comment">// process incoming messages</span></div>
+<div class="line">    Mebm.<a name="a4"></a><a class="code" href="class_mebm_class.html#a53831402e82a3df454a49ef24e64244d" title="Check for incoming messages.">listen</a>();</div>
+<div class="line">    </div>
+<div class="line">    <span class="comment">// check the sprinkler timer</span></div>
+<div class="line">    sprinklerTimer.tick();</div>
+<div class="line"></div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> handleHeaterMessage(<a name="_a5"></a><a class="code" href="class_mebm_class.html" title="A node for sending and receiving MEBM protocol messages.">MebmClass</a> &amp;node, <span class="keyword">const</span> <a name="_a6"></a><a class="code" href="structt__mebm_message.html" title="Mebm message structure.">t_mebmMessage</a> *message)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (strncasecmp(message-&gt;<a name="a7"></a><a class="code" href="structt__mebm_message.html#a5860ad8fc1017e65c080e204754fa61e" title="The per-message varying data for the message, e.g.">msgData</a>, <span class="stringliteral">&quot;On&quot;</span>, 48) == 0)</div>
+<div class="line">        turnOnHeater();</div>
+<div class="line">    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (strncasecmp(message-&gt;<a class="code" href="structt__mebm_message.html#a5860ad8fc1017e65c080e204754fa61e" title="The per-message varying data for the message, e.g.">msgData</a>, <span class="stringliteral">&quot;Off&quot;</span>, 48) == 0)</div>
+<div class="line">        turnOffHeater();</div>
+<div class="line">    <span class="keywordflow">else</span> {</div>
+<div class="line">        Serial.print(<span class="stringliteral">&quot;handleHeaterMessage: message-&gt;msgData invalid: &quot;</span>);</div>
+<div class="line">        Serial.println(message-&gt;<a class="code" href="structt__mebm_message.html#a5860ad8fc1017e65c080e204754fa61e" title="The per-message varying data for the message, e.g.">msgData</a>);</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> handleWaterMessage(<a class="code" href="class_mebm_class.html" title="A node for sending and receiving MEBM protocol messages.">MebmClass</a> &amp;node, <span class="keyword">const</span> <a class="code" href="structt__mebm_message.html" title="Mebm message structure.">t_mebmMessage</a> *message)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordtype">int</span> duration = atoi(message-&gt;<a class="code" href="structt__mebm_message.html#a5860ad8fc1017e65c080e204754fa61e" title="The per-message varying data for the message, e.g.">msgData</a>);</div>
+<div class="line">    turnOnSprinkler();</div>
+<div class="line">    sprinklerTimer.set(60*duration);</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> handleStatusRequest(<a class="code" href="class_mebm_class.html" title="A node for sending and receiving MEBM protocol messages.">MebmClass</a> &amp;node, <span class="keyword">const</span> <a class="code" href="structt__mebm_message.html" title="Mebm message structure.">t_mebmMessage</a> *message)</div>
+<div class="line">{</div>
+<div class="line">    Serial.println(<span class="stringliteral">&quot;handleStatusRequest()&quot;</span>);</div>
+<div class="line">    <span class="keywordtype">char</span> desc[48];</div>
+<div class="line">    memset(desc, 0, 48);</div>
+<div class="line">    snprintf(desc, 48, <span class="stringliteral">&quot;temp=%d, humidity=%d, heater=%d, sprinkler=%d&quot;</span>, </div>
+<div class="line">             getTemperature(), </div>
+<div class="line">             getHumidity(), </div>
+<div class="line">             heaterIsOn, </div>
+<div class="line">             sprinklerIsOn);</div>
+<div class="line">             </div>
+<div class="line">    Mebm.<a class="code" href="class_mebm_class.html#ae619db2126171f1d7d63220784e28364" title="Send a MEBM message to a specific IP address.">sendToIP</a>(houseIP, <span class="stringliteral">&quot;status&quot;</span>, desc);</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> simulateEnvironment()</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">// add -3, -2, -1, 0 or 1 to the temperature</span></div>
+<div class="line">    <span class="comment">// it is biased downwards so the heater will become necessary from time to time...</span></div>
+<div class="line">    greenhouseTemperature += random(-3, 2);</div>
+<div class="line"></div>
+<div class="line">    <span class="comment">// if the heater is on, we will increase the temperature</span></div>
+<div class="line">    <span class="keywordflow">if</span> (heaterIsOn)</div>
+<div class="line">        greenhouseTemperature += 3;</div>
+<div class="line"></div>
+<div class="line">    <span class="comment">// and we&#39;ll adjust the soil humidity depending on the sprinkler status</span></div>
+<div class="line">    <span class="keywordflow">if</span> (sprinklerIsOn)</div>
+<div class="line">        soilHumidity += 5;</div>
+<div class="line">    <span class="keywordflow">else</span></div>
+<div class="line">        soilHumidity -= 1;</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="comment">// In a real implementation, these functions would probaby use digitalWrite to</span></div>
+<div class="line"><span class="comment">// set a pin which would trigger a relay to turn on and off the actual heater</span></div>
+<div class="line"><span class="comment">// In our example, we just set heaterIsOn / sprinklerIsOn to simuate this, but </span></div>
+<div class="line"><span class="comment">// it would be a trivial matter to actually control a device instead.</span></div>
+<div class="line"><span class="keywordtype">void</span> turnOnHeater()</div>
+<div class="line">{</div>
+<div class="line">    heaterIsOn = <span class="keyword">true</span>;</div>
+<div class="line">    Serial.println(<span class="stringliteral">&quot;heater on&quot;</span>);</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> turnOffHeater()</div>
+<div class="line">{</div>
+<div class="line">    heaterIsOn = <span class="keyword">false</span>;</div>
+<div class="line">    Serial.println(<span class="stringliteral">&quot;heater off&quot;</span>);</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> turnOnSprinkler()</div>
+<div class="line">{</div>
+<div class="line">    sprinklerIsOn = <span class="keyword">true</span>;</div>
+<div class="line">    Serial.println(<span class="stringliteral">&quot;sprinkler on&quot;</span>);</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> turnOffSprinkler()</div>
+<div class="line">{</div>
+<div class="line">    sprinklerIsOn = <span class="keyword">false</span>;</div>
+<div class="line">    Serial.println(<span class="stringliteral">&quot;sprinkler off&quot;</span>);</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">int</span> getTemperature()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">return</span> greenhouseTemperature;</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">int</span> getHumidity()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">return</span> soilHumidity;</div>
+<div class="line">}</div>
+<div class="line"></div>
+</div><!-- fragment --> </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Mar 18 2013 14:05:28 for Mebm by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Mar 18 2013 15:52:05 for Mebm by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.3
 </small></address>
