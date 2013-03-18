@@ -87,6 +87,8 @@ public:
     //!             Note that only MEBM_MSGDAT_MAX_SZ characters are used - anything else is ignored
     //! @return 0 on successful send, non-0 otherwise.
     int sendToIP(const IPAddress& toIP, const char* messageType, const char* data);
+    int sendToIP(const IPAddress& toIP, const char* messageType, int data);
+    int sendToIP(const IPAddress& toIP, const char* messageType, float data);
 
     //! @brief Add a resonder for incoming messages. 
     //! 
@@ -135,6 +137,10 @@ public:
     //! @param str a pointer to a string containing a representation of an IP address.
     //! @return an IPAddress object containing the address represented by str.
     static IPAddress str2ip(const char* str);
+
+private:
+    void prepMessage(const char* messageType);
+    int sendStagedMessage(const IPAddress& toIP);
 
 private:
     char _id[MEBM_NODEID_MAX_SZ+1];

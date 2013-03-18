@@ -56,6 +56,35 @@ void MebmClass::begin(const char* name, int numResponders, bool defaultResponder
 
 int MebmClass::sendToIP(const IPAddress& toIP, const char* messageType, const char* data)
 {
+    prepMessage(messageType);
+    strncpy(_buf.msgData, data, MEBM_MSGDAT_MAX_SZ);
+    return sendStagedMessage(toIP);
+}
+
+int MebmClass::sendToIP(const IPAddress& toIP, const char* messageType, int data)
+{
+    prepMessage(messageType);
+    snprintf(_buf.msgData, MEBM_MSGDAT_MAX_SZ, "%d", data);
+    return sendStagedMessage(toIP);
+}
+
+int MebmClass::sendToIP(const IPAddress& toIP, const char* messageType, float data)
+{
+    prepMessage(messageType);
+    snprintf(_buf.msgData, MEBM_MSGDAT_MAX_SZ, "%f", data);
+    return sendStagedMessage(toIP);
+}
+
+void MebmClass::prepMessage(const char* messageType)
+{
+    memset((void*)&_buf, 0, sizeof(t_mebmMessage));
+    strncpy(_buf.magic, MEBM_MAGIC_STR, MEBM_MAGIC_SZ);
+    strncpy(_buf.msgFrom, _id, MEBM_NODEID_MAX_SZ);
+    strncpy(_buf.msgType, messageType, MEBM_MSGTYP_MAX_SZ);
+}
+
+int MebmClass::sendStagedMessage(const IPAddress& toIP)
+{
     int i;
     byte* b = (byte*)&_buf;
     EthernetClient client;
@@ -67,18 +96,11 @@ int MebmClass::sendToIP(const IPAddress& toIP, const char* messageType, const ch
     Serial.print("MEBM toip=");
     Serial.print(ipStr);
     Serial.print(", t=");
-    Serial.print(messageType);
+    Serial.print(_buf.msgType);
     Serial.print(", d=");
-    Serial.print(data);
+    Serial.print(_buf.msgData);
     Serial.print(" ");
 #endif
-
-    memset((void*)&_buf, 0, sizeof(t_mebmMessage));
-    strncpy(_buf.magic, MEBM_MAGIC_STR, MEBM_MAGIC_SZ);
-    strncpy(_buf.msgFrom, _id, MEBM_NODEID_MAX_SZ);
-    strncpy(_buf.msgType, messageType, MEBM_MSGTYP_MAX_SZ);
-    strncpy(_buf.msgData, data, MEBM_MSGDAT_MAX_SZ);
-
 
     // Open TCP connection, send data packet, close connection.
     if (!client.connect(toIP, MEBM_PORT)) {
