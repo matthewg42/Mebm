@@ -30,7 +30,7 @@ Usage
 
 See the Doxygen documentation for API and tutorial examples:
 
-	http://matthewg42.github.com/Mebm/
+<http://matthewg42.github.com/Mebm/>
 
 Future
 ------
