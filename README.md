@@ -44,3 +44,12 @@ signatures, or encrypted messages.  RAM and flash constraints
 probably rules out public key cryptography, but AES with a pre-shared
 key seems possible.
 
+Variable length message might also be a nice touch...  Fixed length
+is easy to parse, and we don't have to worry about as much error 
+handling - we either have enough memory for one fixed working buffer
+when the constructor runs or we don't.  However, the flexibility 
+of variable length messages might be worth the complexity.
+
+An alternative is to stay with fixed length messages, but implement
+a method of spreading large messages over multiple messages.
+
