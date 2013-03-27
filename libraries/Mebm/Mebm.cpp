@@ -232,7 +232,7 @@ int MebmClass::listen()
             Serial.println(typeMatch);
 #endif
             if (fromMatch && typeMatch) {
-                // call the responder
+                // call the callback for this responder
 #ifdef MEBM_SERIAL_DEBUG
                 Serial.print("MEBM listen(");
                 Serial.print(_id);
